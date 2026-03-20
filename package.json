@@ -1,0 +1,21 @@
+{
+  "name": "protein-daily",
+  "version": "1.0.0",
+  "description": "Protein of the Day — daily protein structure viewer",
+  "scripts": {
+    "build": "mkdir -p www && cp index.html styles.css app.js proteins.js cache.js proteins.csv www/ && cp -r vendor www/",
+    "sync": "npm run build && npx cap sync",
+    "open:ios": "npx cap open ios",
+    "open:android": "npx cap open android"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/cli": "^8.1.0",
+    "@capacitor/core": "^8.1.0",
+    "@capacitor/ios": "^8.1.0",
+    "3dmol": "^2.5.4"
+  }
+}

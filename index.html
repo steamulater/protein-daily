@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protein of the Day</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="vendor/3dmol-min.js"></script>
+</head>
+<body>
+<div id="js-error" style="display:none;position:fixed;top:0;left:0;right:0;background:#c0392b;color:#fff;padding:12px;font-family:monospace;font-size:13px;z-index:9999;white-space:pre-wrap;word-break:break-all;max-height:40vh;overflow:auto;"></div>
+<script>
+window.onerror = function(msg, src, line, col, err) {
+    var el = document.getElementById('js-error');
+    el.style.display = 'block';
+    el.textContent = 'msg: ' + msg + '\nerr: ' + (err ? (err.stack || err.toString()) : 'none') + '\nsrc: ' + src + ':' + line + ':' + col;
+};
+window.addEventListener('unhandledrejection', function(e) {
+    var el = document.getElementById('js-error');
+    el.style.display = 'block';
+    el.textContent += '\nUnhandled promise: ' + (e.reason && e.reason.stack ? e.reason.stack : String(e.reason));
+});
+</script>
+    <div class="app-container">
+        <header class="header">
+            <h1>Protein of the Day</h1>
+            <p class="subtitle">Day <span id="day-number">1</span> of 365</p>
+            <div id="streak-badge" class="streak-badge" aria-label="Viewing streak"></div>
+        </header>
+
+        <main class="main-content">
+            <section class="viewer-section">
+                <div id="protein-viewer" class="protein-viewer"></div>
+                <div class="viewer-controls">
+                    <button id="style-cartoon" class="style-btn active">Cartoon</button>
+                    <button id="style-surface" class="style-btn">Surface</button>
+                    <button id="style-stick" class="style-btn">Stick</button>
+                    <button id="style-sphere" class="style-btn">Sphere</button>
+                    <button id="reset-view" class="reset-btn">Reset View</button>
+                </div>
+                <p class="viewer-hint">Drag to rotate | Scroll to zoom | Right-click drag to pan</p>
+                <p id="cache-status" class="cache-indicator"></p>
+            </section>
+
+            <section class="card-section">
+                <div class="protein-card">
+                    <div class="card-header">
+                        <span id="protein-type" class="type-badge">ENZYME</span>
+                        <span id="pdb-id" class="pdb-badge">PDB: 1HHO</span>
+                    </div>
+
+                    <h2 id="protein-name" class="protein-name">Hemoglobin</h2>
+                    <p id="protein-description" class="protein-description">The oxygen-carrying protein in red blood cells</p>
+
+                    <div class="stats-container">
+                        <div class="stat-row">
+                            <span class="stat-label">BIO RELEVANCE</span>
+                            <div class="stat-bar-container">
+                                <div id="bio-bar" class="stat-bar bio-bar" style="width: 95%"></div>
+                            </div>
+                            <span id="bio-value" class="stat-value">95</span>
+                        </div>
+
+                        <div class="stat-row">
+                            <span class="stat-label">NOTORIETY</span>
+                            <div class="stat-bar-container">
+                                <div id="notoriety-bar" class="stat-bar notoriety-bar" style="width: 90%"></div>
+                            </div>
+                            <span id="notoriety-value" class="stat-value">90</span>
+                        </div>
+                    </div>
+
+                    <div class="discovery-section">
+                        <span class="discovery-label">DISCOVERED</span>
+                        <span id="discovery-year" class="discovery-year">1959</span>
+                    </div>
+
+                    <div class="fun-fact-section">
+                        <div class="fun-fact-header">
+                            <span class="sparkle">&#10024;</span>
+                            <span>FUN FACT</span>
+                            <span class="sparkle">&#10024;</span>
+                        </div>
+                        <p id="fun-fact" class="fun-fact-text">First protein structure ever solved by X-ray crystallography!</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="navigation">
+            <button id="prev-btn" class="nav-btn">
+                <span class="arrow">&#9664;</span> Previous
+            </button>
+            <button id="today-btn" class="nav-btn today-btn">Today's Protein</button>
+            <button id="next-btn" class="nav-btn">
+                Next <span class="arrow">&#9654;</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="proteins.js"></script>
+    <script src="cache.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

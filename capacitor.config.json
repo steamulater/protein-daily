@@ -1,0 +1,8 @@
+{
+  "appId": "com.proteinoftheday.app",
+  "appName": "Protein Daily",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

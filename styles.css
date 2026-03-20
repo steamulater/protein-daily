@@ -1,0 +1,522 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --card-gradient: linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    --bio-color: #00d4aa;
+    --notoriety-color: #ff6b6b;
+    --gold: #ffd700;
+    --silver: #c0c0c0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0c0c1e 0%, #1a1a3e 50%, #0c0c1e 100%);
+    min-height: 100vh;
+    color: #fff;
+}
+
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(90deg, #00d4aa, #667eea, #ff6b6b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+}
+
+.subtitle {
+    color: #888;
+    font-size: 1.1rem;
+    margin-top: 5px;
+}
+
+#day-number {
+    color: #00d4aa;
+    font-weight: bold;
+}
+
+/* Main Content */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    flex: 1;
+    align-items: start;
+    padding: 20px 0;
+}
+
+/* Protein Viewer */
+.viewer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.protein-viewer {
+    width: 100%;
+    height: clamp(280px, 50vh, 550px);
+    background: #0a0a1a;
+    border-radius: 15px;
+    border: 2px solid #333;
+    overflow: hidden;
+    position: relative;
+}
+
+.viewer-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.style-btn {
+    padding: 12px 20px;
+    min-height: 44px;
+    border: 2px solid #444;
+    background: transparent;
+    color: #aaa;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.style-btn:hover {
+    border-color: #667eea;
+    color: #fff;
+}
+
+.style-btn.active {
+    background: var(--primary-gradient);
+    border-color: transparent;
+    color: #fff;
+}
+
+.reset-btn {
+    padding: 12px 20px;
+    min-height: 44px;
+    border: 2px solid #ff6b6b;
+    background: transparent;
+    color: #ff6b6b;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.reset-btn:hover {
+    background: #ff6b6b;
+    color: #fff;
+}
+
+.viewer-hint {
+    text-align: center;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+/* Pokemon-style Card */
+.card-section {
+    display: flex;
+    justify-content: center;
+}
+
+.protein-card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--card-gradient);
+    border-radius: 20px;
+    padding: 25px;
+    border: 3px solid #333;
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.protein-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.type-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.type-badge.enzyme { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.type-badge.structural { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.type-badge.signaling { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+.type-badge.transport { background: linear-gradient(135deg, #fa709a, #fee140); }
+.type-badge.immune { background: linear-gradient(135deg, #a8edea, #fed6e3); color: #333; }
+.type-badge.receptor { background: linear-gradient(135deg, #667eea, #764ba2); }
+.type-badge.motor { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.type-badge.storage { background: linear-gradient(135deg, #ffecd2, #fcb69f); color: #333; }
+.type-badge.nucleic-acid { background: linear-gradient(135deg, #a1c4fd, #c2e9fb); color: #333; }
+.type-badge.regulatory { background: linear-gradient(135deg, #d299c2, #fef9d7); color: #333; }
+.type-badge.channel { background: linear-gradient(135deg, #89f7fe, #66a6ff); }
+.type-badge.photosynthetic { background: linear-gradient(135deg, #56ab2f, #a8e063); }
+.type-badge.viral { background: linear-gradient(135deg, #eb3349, #f45c43); }
+.type-badge.antibiotic { background: linear-gradient(135deg, #ff9a9e, #fecfef); color: #333; }
+.type-badge.chaperone { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
+
+.pdb-badge {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-family: monospace;
+    color: #aaa;
+}
+
+.protein-name {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, #fff, #ccc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.protein-description {
+    color: #999;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+/* Stats */
+.stats-container {
+    margin-bottom: 20px;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.stat-label {
+    width: 110px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: #888;
+}
+
+.stat-bar-container {
+    flex: 1;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.stat-bar {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.8s ease-out;
+}
+
+.bio-bar {
+    background: linear-gradient(90deg, #00d4aa, #00ff88);
+    box-shadow: 0 0 10px rgba(0, 212, 170, 0.5);
+}
+
+.notoriety-bar {
+    background: linear-gradient(90deg, #ff6b6b, #ffa500);
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+}
+
+.stat-value {
+    width: 30px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-align: right;
+}
+
+/* Discovery Section */
+.discovery-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.discovery-label {
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    color: #888;
+}
+
+.discovery-year {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+/* Fun Fact */
+.fun-fact-section {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.fun-fact-header {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+.sparkle {
+    animation: sparkle 1.5s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.fun-fact-text {
+    color: #ccc;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    text-align: center;
+    font-style: italic;
+}
+
+/* Navigation */
+.navigation {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 30px 0;
+}
+
+.nav-btn {
+    padding: 15px 30px;
+    border: 2px solid #444;
+    background: transparent;
+    color: #fff;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-btn:hover {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+}
+
+.today-btn {
+    background: var(--primary-gradient);
+    border-color: transparent;
+}
+
+.today-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+.arrow {
+    font-size: 0.8rem;
+}
+
+/* Loading State */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #666;
+}
+
+.loading::after {
+    content: '';
+    width: 40px;
+    height: 40px;
+    border: 3px solid #333;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+
+    .header h1 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 500px) {
+    .navigation {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .nav-btn {
+        width: 100%;
+        max-width: 250px;
+        justify-content: center;
+    }
+
+    .viewer-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .protein-card {
+        padding: 16px;
+        max-width: 100%;
+    }
+
+    .protein-name {
+        font-size: 1.4rem;
+    }
+
+    .stat-label {
+        width: 80px;
+        font-size: 0.65rem;
+    }
+}
+
+/* Landscape phones (short viewport, rotated) */
+@media (max-height: 500px) and (orientation: landscape) {
+    .main-content {
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .protein-viewer {
+        height: clamp(180px, 65vw, 280px);
+    }
+
+    .header {
+        padding: 6px 0;
+    }
+
+    .header h1 {
+        font-size: 1.4rem;
+    }
+
+    .subtitle {
+        font-size: 0.85rem;
+        margin-top: 2px;
+    }
+
+    .navigation {
+        padding: 10px 0;
+    }
+}
+
+/* Streak badge */
+.streak-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+    padding: 5px 12px;
+    background: rgba(255, 165, 0, 0.15);
+    border: 1px solid rgba(255, 165, 0, 0.4);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #ffa500;
+    min-height: 30px;
+}
+
+.streak-badge:empty {
+    display: none;
+}
+
+.streak-badge .streak-flame {
+    animation: flicker 1.8s ease-in-out infinite alternate;
+}
+
+.streak-badge.streak-milestone {
+    border-color: #ffd700;
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.15);
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+@keyframes flicker {
+    0%   { transform: scaleY(1); opacity: 1; }
+    100% { transform: scaleY(1.1) translateY(-1px); opacity: 0.85; }
+}
+
+/* Cache status indicator */
+.cache-indicator {
+    text-align: center;
+    font-size: 0.75rem;
+    min-height: 1.1em;
+    color: transparent;
+}
+
+.cache-indicator.cached {
+    color: #00d4aa;
+}
+
+.cache-indicator.live {
+    color: #888;
+}
