@@ -197,6 +197,33 @@
     .month-arrow:hover { border-color: var(--crimson); color: var(--crimson); }
     .month-arrow:disabled { opacity: 0.3; cursor: default; }
 
+    /* ── Blurb ── */
+    .blurb-section {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--crimson);
+      border-radius: 2px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+    }
+
+    .blurb-label {
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--crimson);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .blurb-text {
+      font-family: 'Libre Baskerville', Georgia, serif;
+      font-size: 0.97rem;
+      line-height: 1.8;
+      color: var(--dark);
+      font-style: italic;
+    }
+
     /* ── Info column ── */
     .info-col {}
 
@@ -442,6 +469,12 @@
 
   <div class="date-strip" id="date-strip">Loading…</div>
 
+  <!-- Blurb strip — full width above grid -->
+  <div id="blurb-section" class="blurb-section" style="max-width:1100px;margin:24px auto 0;padding:20px 24px;display:none;">
+    <div class="blurb-label">Today's Protein</div>
+    <p class="blurb-text" id="blurb-text"></p>
+  </div>
+
   <div class="page">
     <!-- Left: viewer + mini calendar -->
     <div class="viewer-col">
@@ -623,6 +656,16 @@
       document.getElementById('pdb-id').textContent = `PDB: ${protein.pdbId}`;
       document.getElementById('protein-name').textContent = protein.name;
       document.getElementById('protein-description').textContent = protein.description;
+
+      // Blurb
+      const blurbSection = document.getElementById('blurb-section');
+      const blurbText = document.getElementById('blurb-text');
+      if (protein.blurb) {
+        blurbText.textContent = protein.blurb;
+        blurbSection.style.display = 'block';
+      } else {
+        blurbSection.style.display = 'none';
+      }
       document.getElementById('discovery-year').textContent = protein.discoveryYear;
       document.getElementById('fun-fact').textContent = protein.funFact;
       document.getElementById('pdb-link').href = `https://www.rcsb.org/structure/${protein.pdbId}`;
