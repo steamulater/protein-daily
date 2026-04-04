@@ -10,13 +10,15 @@ class ProteinApp {
     }
 
     // Get day of year (1-365)
-    getDayOfYear() {
-        const now = new Date();
-        const start = new Date(now.getFullYear(), 0, 0);
-        const diff = now - start;
+    getDayOfYear(date = new Date()) {
+        const start = new Date(date.getFullYear(), 0, 0);
+        const diff = date - start;
         const oneDay = 1000 * 60 * 60 * 24;
         return Math.floor(diff / oneDay);
     }
+
+    getTodayIndex()     { return this.getDayOfYear() - 1; }
+    getYesterdayIndex() { return Math.max(0, this.getTodayIndex() - 1); }
 
     init() {
         this.setupViewer();
@@ -68,12 +70,16 @@ class ProteinApp {
     }
 
     navigate(direction) {
-        this.currentProteinIndex = (this.currentProteinIndex + direction + PROTEINS.length) % PROTEINS.length;
+        const next = this.currentProteinIndex + direction;
+        const yesterday = this.getYesterdayIndex();
+        const today = this.getTodayIndex();
+        if (next < yesterday || next > today) return;
+        this.currentProteinIndex = next;
         this.loadProtein(this.currentProteinIndex);
     }
 
     goToToday() {
-        this.currentProteinIndex = this.getDayOfYear() - 1;
+        this.currentProteinIndex = this.getTodayIndex();
         this.loadProtein(this.currentProteinIndex);
     }
 
@@ -82,7 +88,9 @@ class ProteinApp {
 
         // Update UI
         this.updateCard(protein);
-        this.updateDayNumber(index + 1);
+        this.updateDateDisplay(index);
+        this.updateNavButtons(index);
+        this.updateReelEmbed(protein);
 
         // Load 3D structure
         await this.loadStructure(protein.pdbId);
@@ -146,8 +154,47 @@ class ProteinApp {
         requestAnimationFrame(update);
     }
 
-    updateDayNumber(day) {
-        document.getElementById('day-number').textContent = day;
+    updateDateDisplay(index) {
+        const today = this.getTodayIndex();
+        const isToday = index === today;
+
+        // Compute the calendar date for this index (day of year → date)
+        const now = new Date();
+        const date = new Date(now.getFullYear(), 0, index + 1);
+        const formatted = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+        const label = isToday ? `Today · ${formatted}` : `Yesterday · ${formatted}`;
+        document.getElementById('date-display').textContent = label;
+    }
+
+    updateNavButtons(index) {
+        const yesterday = this.getYesterdayIndex();
+        const today = this.getTodayIndex();
+        document.getElementById('prev-btn').disabled = index <= yesterday;
+        document.getElementById('next-btn').disabled = index >= today;
+    }
+
+    updateReelEmbed(protein) {
+        const section = document.getElementById('reel-section');
+        const container = document.getElementById('reel-container');
+
+        if (!protein.reelUrl) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+        container.innerHTML = `
+            <blockquote class="instagram-media"
+                data-instgrm-permalink="${protein.reelUrl}"
+                data-instgrm-version="14"
+                style="background:#000;border:0;border-radius:12px;margin:0 auto;max-width:400px;width:100%;">
+            </blockquote>`;
+
+        // Re-process embeds if the Instagram script already loaded
+        if (window.instgrm) {
+            window.instgrm.Embeds.process();
+        }
     }
 
     async loadStructure(pdbId) {

@@ -24,7 +24,7 @@ window.addEventListener('unhandledrejection', function(e) {
     <div class="app-container">
         <header class="header">
             <h1>Protein of the Day</h1>
-            <p class="subtitle">Day <span id="day-number">1</span> of 365</p>
+            <p class="subtitle" id="date-display"></p>
             <div id="streak-badge" class="streak-badge" aria-label="Viewing streak"></div>
         </header>
 
@@ -85,6 +85,15 @@ window.addEventListener('unhandledrejection', function(e) {
                     </div>
                 </div>
             </section>
+
+            <section id="reel-section" class="reel-section" style="display:none;">
+                <div class="reel-header">
+                    <span class="sparkle">&#127909;</span>
+                    <span>THIS WEEK'S REEL</span>
+                    <span class="sparkle">&#127909;</span>
+                </div>
+                <div id="reel-container" class="reel-container"></div>
+            </section>
         </main>
 
         <nav class="navigation">
@@ -101,5 +110,6 @@ window.addEventListener('unhandledrejection', function(e) {
     <script src="proteins.js"></script>
     <script src="cache.js"></script>
     <script src="app.js"></script>
+    <script async src="https://www.instagram.com/embed.js"></script>
 </body>
 </html>

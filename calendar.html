@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Protein of the Day — 2026 Calendar</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0c0c1e;
+      --surface: #1a1a2e;
+      --border: rgba(102,126,234,0.2);
+      --text: #e0e0ff;
+      --muted: #666;
+      --today-ring: #ffd700;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      padding: 32px 20px 60px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    header h1 { font-size: clamp(1.4rem, 4vw, 2.2rem); letter-spacing: 2px; }
+    header p  { color: var(--muted); margin-top: 6px; font-size: 0.85rem; letter-spacing: 1px; }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px 18px;
+      margin-bottom: 36px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #aaa;
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Year grid */
+    .year-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 24px;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    /* Month block */
+    .month {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .month-name {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #8888cc;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .day-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+    }
+    .dow-header {
+      font-size: 0.55rem;
+      color: var(--muted);
+      text-align: center;
+      padding-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Individual day cell */
+    .day-cell {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.12s, box-shadow 0.12s;
+      border: 1px solid transparent;
+    }
+    .day-cell:hover {
+      transform: scale(1.35);
+      z-index: 10;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    }
+    .day-cell.empty { background: transparent; cursor: default; }
+    .day-cell.past  { opacity: 0.4; }
+    .day-cell.today {
+      border: 2px solid var(--today-ring) !important;
+      box-shadow: 0 0 8px rgba(255,215,0,0.5);
+      opacity: 1 !important;
+    }
+    .day-cell.de-novo {
+      box-shadow: 0 0 6px rgba(255,210,0,0.7);
+      animation: pulse-gold 2.5s ease-in-out infinite alternate;
+    }
+    @keyframes pulse-gold {
+      from { box-shadow: 0 0 4px rgba(255,210,0,0.5); }
+      to   { box-shadow: 0 0 10px rgba(255,210,0,0.9); }
+    }
+    .day-cell .day-num {
+      position: absolute;
+      top: 1px; left: 2px;
+      font-size: 0.42rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      display: none;
+      position: fixed;
+      background: #1a1a3e;
+      border: 1px solid rgba(102,126,234,0.5);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.78rem;
+      pointer-events: none;
+      z-index: 1000;
+      max-width: 240px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .tooltip.visible { display: block; }
+    .tooltip-date   { font-size: 0.65rem; color: var(--muted); margin-bottom: 4px; }
+    .tooltip-name   { font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .tooltip-type   { font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; }
+    .tooltip-fact   { font-size: 0.68rem; color: #aaa; margin-top: 6px; line-height: 1.4; border-top: 1px solid var(--border); padding-top: 6px; }
+
+    /* Type colors — matches app badge colors */
+    .t-enzyme        { background: #c0456a; }
+    .t-structural    { background: #1a7abf; }
+    .t-signaling     { background: #1aaa65; }
+    .t-transport     { background: #c07a1a; }
+    .t-immune        { background: #5a9fa0; }
+    .t-receptor      { background: #5a4aa0; }
+    .t-motor         { background: #a04580; }
+    .t-storage       { background: #8a7050; }
+    .t-nucleic-acid  { background: #4a7aaa; }
+    .t-regulatory    { background: #8a5a8a; }
+    .t-channel       { background: #2a8aaa; }
+    .t-photosynthetic{ background: #3a8a2a; }
+    .t-viral         { background: #aa3a2a; }
+    .t-chaperone     { background: #7a4aaa; }
+    .t-de-novo       { background: linear-gradient(135deg, #f7971e, #ffd200); }
+
+    footer {
+      text-align: center;
+      margin-top: 48px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+    footer a { color: #667eea; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PROTEIN OF THE DAY — 2026</h1>
+    <p>365 proteins · one per day · color coded by type · ✦ = de novo designed</p>
+  </header>
+
+  <div class="legend" id="legend"></div>
+  <div class="year-grid" id="year-grid"></div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+  <footer>
+    <p><a href="index.html">← Back to Protein of the Day</a> &nbsp;·&nbsp; steamulater.com</p>
+  </footer>
+
+  <script src="proteins.js"></script>
+  <script>
+    const YEAR = 2026;
+    const MONTHS = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+    const DOW = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+    const TYPE_COLORS = {
+      'enzyme':         't-enzyme',
+      'structural':     't-structural',
+      'signaling':      't-signaling',
+      'transport':      't-transport',
+      'immune':         't-immune',
+      'receptor':       't-receptor',
+      'motor':          't-motor',
+      'storage':        't-storage',
+      'nucleic-acid':   't-nucleic-acid',
+      'regulatory':     't-regulatory',
+      'channel':        't-channel',
+      'photosynthetic': 't-photosynthetic',
+      'viral':          't-viral',
+      'chaperone':      't-chaperone',
+      'de-novo':        't-de-novo',
+    };
+
+    const TYPE_HEX = {
+      'enzyme':'#c0456a','structural':'#1a7abf','signaling':'#1aaa65',
+      'transport':'#c07a1a','immune':'#5a9fa0','receptor':'#5a4aa0',
+      'motor':'#a04580','storage':'#8a7050','nucleic-acid':'#4a7aaa',
+      'regulatory':'#8a5a8a','channel':'#2a8aaa','photosynthetic':'#3a8a2a',
+      'viral':'#aa3a2a','chaperone':'#7a4aaa','de-novo':'#f7971e',
+    };
+
+    // Build day-of-year → protein map
+    function dayOfYear(y, m, d) {
+      const start = new Date(y, 0, 0);
+      const date  = new Date(y, m, d);
+      return Math.floor((date - start) / 86400000);
+    }
+
+    const today = new Date();
+    const todayDOY = dayOfYear(today.getFullYear(), today.getMonth(), today.getDate());
+
+    // Legend
+    const legendEl = document.getElementById('legend');
+    Object.entries(TYPE_COLORS).forEach(([type, cls]) => {
+      const item = document.createElement('div');
+      item.className = 'legend-item';
+      const dot = document.createElement('div');
+      dot.className = 'legend-dot';
+      dot.style.background = TYPE_HEX[type] || '#888';
+      if (type === 'de-novo') dot.style.boxShadow = '0 0 6px rgba(255,210,0,0.8)';
+      item.appendChild(dot);
+      item.appendChild(document.createTextNode(type === 'de-novo' ? '✦ de novo designed' : type));
+      legendEl.appendChild(item);
+    });
+
+    // Tooltip
+    const tooltip = document.getElementById('tooltip');
+    document.addEventListener('mousemove', e => {
+      tooltip.style.left = (e.clientX + 14) + 'px';
+      tooltip.style.top  = (e.clientY - 10) + 'px';
+    });
+
+    // Build calendar
+    const grid = document.getElementById('year-grid');
+
+    for (let m = 0; m < 12; m++) {
+      const monthEl = document.createElement('div');
+      monthEl.className = 'month';
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'month-name';
+      nameEl.textContent = MONTHS[m];
+      monthEl.appendChild(nameEl);
+
+      const dayGrid = document.createElement('div');
+      dayGrid.className = 'day-grid';
+
+      // Day-of-week headers
+      DOW.forEach(d => {
+        const h = document.createElement('div');
+        h.className = 'dow-header';
+        h.textContent = d;
+        dayGrid.appendChild(h);
+      });
+
+      const firstDOW = new Date(YEAR, m, 1).getDay();
+      const daysInMonth = new Date(YEAR, m + 1, 0).getDate();
+
+      // Empty cells before first day
+      for (let e = 0; e < firstDOW; e++) {
+        const empty = document.createElement('div');
+        empty.className = 'day-cell empty';
+        dayGrid.appendChild(empty);
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const doy = dayOfYear(YEAR, m, d);
+        const protein = PROTEINS[doy - 1];
+        const cell = document.createElement('div');
+        cell.className = 'day-cell';
+
+        const typeClass = TYPE_COLORS[protein ? protein.type : ''] || 't-enzyme';
+        cell.classList.add(typeClass);
+        if (protein && protein.type === 'de-novo') cell.classList.add('de-novo');
+        if (doy < todayDOY) cell.classList.add('past');
+        if (doy === todayDOY) cell.classList.add('today');
+
+        const num = document.createElement('span');
+        num.className = 'day-num';
+        num.textContent = d;
+        cell.appendChild(num);
+
+        if (protein) {
+          cell.addEventListener('mouseenter', () => {
+            const dateStr = new Date(YEAR, m, d).toLocaleDateString('en-US', {month:'long', day:'numeric'});
+            tooltip.innerHTML = `
+              <div class="tooltip-date">Day ${doy} · ${dateStr}</div>
+              <div class="tooltip-name">${protein.name}</div>
+              <div class="tooltip-type" style="color:${TYPE_HEX[protein.type] || '#888'}">${protein.type.toUpperCase().replace('-',' ')}</div>
+              <div class="tooltip-fact">${protein.funFact}</div>
+            `;
+            tooltip.classList.add('visible');
+          });
+          cell.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+          cell.addEventListener('click', () => {
+            window.location.href = 'index.html';
+          });
+        }
+
+        dayGrid.appendChild(cell);
+      }
+
+      monthEl.appendChild(dayGrid);
+      grid.appendChild(monthEl);
+    }
+  </script>
+</body>
+</html>
