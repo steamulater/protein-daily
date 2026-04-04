@@ -554,3 +554,18 @@ body {
     pointer-events: none;
 }
 .type-badge.de-novo { background: linear-gradient(135deg, #f7971e, #ffd200); color: #111; letter-spacing: 1.5px; }
+
+/* Footer calendar link */
+.site-footer {
+    text-align: center;
+    padding: 20px 0 8px;
+}
+.calendar-link {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+.calendar-link:hover { opacity: 1; }
