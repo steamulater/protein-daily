@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Protein of the Day — 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="vendor/3dmol-min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --crimson: #8B1A1A;
+      --dark: #1a1a1a;
+      --mid: #555;
+      --muted: #999;
+      --border: #ddd;
+      --bg: #fafafa;
+      --gold: #b8860b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--dark);
+      font-family: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .topbar-brand {
+      font-family: 'Libre Baskerville', Georgia, serif;
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--crimson);
+      text-decoration: none;
+    }
+
+    .topbar-back {
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.15s;
+    }
+    .topbar-back:hover { color: var(--crimson); }
+
+    /* ── Date strip ── */
+    .date-strip {
+      background: var(--crimson);
+      color: #fff;
+      text-align: center;
+      padding: 10px 20px;
+      font-size: 0.72rem;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* ── Main layout ── */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* ── Viewer column ── */
+    .viewer-col {}
+
+    .protein-viewer {
+      width: 100%;
+      height: clamp(300px, 55vh, 520px);
+      background: #0a0a0a;
+      border: 1px solid #ccc;
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .viewer-hint {
+      margin-top: 8px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    .cache-indicator {
+      text-align: center;
+      font-size: 0.7rem;
+      min-height: 1.1em;
+      margin-top: 4px;
+      color: transparent;
+      letter-spacing: 0.5px;
+    }
+    .cache-indicator.cached { color: #2a6b3a; }
+    .cache-indicator.live   { color: var(--muted); }
+
+    /* ── Calendar-style nav under viewer ── */
+    .month-nav {
+      margin-top: 24px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--crimson);
+      border-radius: 2px;
+      padding: 16px;
+    }
+
+    .month-nav-title {
+      font-family: 'Libre Baskerville', Georgia, serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--crimson);
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .mini-dow {
+      font-size: 0.5rem;
+      color: var(--muted);
+      text-align: center;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding-bottom: 4px;
+    }
+
+    .mini-cell {
+      aspect-ratio: 1;
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+      border: 1px solid transparent;
+      transition: transform 0.1s;
+      background: #eee;
+      text-decoration: none;
+    }
+    .mini-cell:hover { transform: scale(1.2); z-index: 5; }
+    .mini-cell.empty { background: transparent; cursor: default; pointer-events: none; }
+    .mini-cell.past  { opacity: 0.35; }
+    .mini-cell.active {
+      border: 2px solid var(--crimson) !important;
+      opacity: 1 !important;
+    }
+    .mini-cell.de-novo { animation: pulse-gold 2.5s ease-in-out infinite alternate; }
+    @keyframes pulse-gold {
+      from { box-shadow: 0 0 2px rgba(184,134,11,0.5); }
+      to   { box-shadow: 0 0 7px rgba(184,134,11,0.9); }
+    }
+    .mini-num {
+      position: absolute;
+      top: 1px; left: 2px;
+      font-size: 0.38rem;
+      color: rgba(255,255,255,0.6);
+      line-height: 1;
+    }
+
+    .month-arrows {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .month-arrow {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: var(--mid);
+      transition: all 0.15s;
+    }
+    .month-arrow:hover { border-color: var(--crimson); color: var(--crimson); }
+    .month-arrow:disabled { opacity: 0.3; cursor: default; }
+
+    /* ── Info column ── */
+    .info-col {}
+
+    .protein-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--crimson);
+      border-radius: 2px;
+      padding: 28px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .type-badge {
+      padding: 4px 12px;
+      border-radius: 2px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #fff;
+      background: var(--crimson);
+    }
+
+    .type-badge.enzyme        { background: #8B1A1A; }
+    .type-badge.structural    { background: #1a4a7a; }
+    .type-badge.signaling     { background: #1a6b3a; }
+    .type-badge.transport     { background: #7a4a1a; }
+    .type-badge.immune        { background: #2a6b6b; }
+    .type-badge.receptor      { background: #3a2a7a; }
+    .type-badge.motor         { background: #6a1a6a; }
+    .type-badge.storage       { background: #5a4a2a; }
+    .type-badge.nucleic-acid  { background: #2a4a7a; }
+    .type-badge.regulatory    { background: #5a2a5a; }
+    .type-badge.channel       { background: #1a5a6a; }
+    .type-badge.photosynthetic{ background: #2a5a1a; }
+    .type-badge.viral         { background: #7a1a1a; }
+    .type-badge.antibiotic    { background: #6a3a1a; }
+    .type-badge.chaperone     { background: #4a1a6a; }
+    .type-badge.de-novo       { background: var(--gold); }
+
+    .pdb-badge {
+      font-size: 0.72rem;
+      font-family: 'Courier New', monospace;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    .protein-name {
+      font-family: 'Libre Baskerville', Georgia, serif;
+      font-size: 1.7rem;
+      font-style: italic;
+      color: var(--dark);
+      margin-bottom: 6px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .protein-description {
+      color: var(--mid);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    /* Stats */
+    .stats-container { margin-bottom: 20px; }
+
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .stat-label {
+      width: 110px;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .stat-bar-container {
+      flex: 1;
+      height: 6px;
+      background: #eee;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .stat-bar {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.8s ease-out;
+    }
+
+    .bio-bar        { background: var(--crimson); }
+    .notoriety-bar  { background: #444; }
+
+    .stat-value {
+      width: 28px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-align: right;
+      color: var(--dark);
+    }
+
+    /* Discovery */
+    .discovery-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: #f5f5f5;
+      border-radius: 2px;
+      margin-bottom: 20px;
+    }
+
+    .discovery-label {
+      font-size: 0.62rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .discovery-year {
+      font-family: 'Libre Baskerville', Georgia, serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--crimson);
+    }
+
+    /* Fun fact */
+    .fun-fact-section {
+      background: #f9f4f4;
+      border-radius: 2px;
+      padding: 16px;
+      border-left: 3px solid var(--crimson);
+      margin-bottom: 20px;
+    }
+
+    .fun-fact-header {
+      font-size: 0.62rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--crimson);
+      margin-bottom: 8px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .fun-fact-text {
+      color: var(--mid);
+      font-size: 0.88rem;
+      line-height: 1.7;
+      text-align: center;
+      font-style: italic;
+      font-family: 'Libre Baskerville', Georgia, serif;
+    }
+
+    /* PDB link */
+    .pdb-link {
+      display: block;
+      text-align: center;
+      font-size: 0.72rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      transition: all 0.15s;
+    }
+    .pdb-link:hover { border-color: var(--crimson); color: var(--crimson); }
+
+    /* ── Prev / Next navigation ── */
+    .protein-nav {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .protein-nav a {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--mid);
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .protein-nav a:hover { border-color: var(--crimson); color: var(--crimson); }
+    .protein-nav a.hidden { visibility: hidden; }
+
+    /* ── Loading ── */
+    .loading-ring {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+    .loading-ring::after {
+      content: '';
+      width: 32px; height: 32px;
+      border: 2px solid #333;
+      border-top-color: var(--crimson);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Responsive ── */
+    @media (max-width: 780px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+      .topbar { padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a class="topbar-brand" href="calendar.html">Protein of the Day — 2026</a>
+    <a class="topbar-back" href="calendar.html">← Full Calendar</a>
+  </div>
+
+  <div class="date-strip" id="date-strip">Loading…</div>
+
+  <div class="page">
+    <!-- Left: viewer + mini calendar -->
+    <div class="viewer-col">
+      <div id="protein-viewer" class="protein-viewer">
+        <div class="loading-ring"></div>
+      </div>
+      <p class="viewer-hint">Drag to rotate · Scroll to zoom · Right-click to pan</p>
+      <p class="cache-indicator" id="cache-status"></p>
+
+      <!-- Mini month calendar -->
+      <div class="month-nav">
+        <div class="month-arrows">
+          <button class="month-arrow" id="prev-month">&#9664;</button>
+          <div class="month-nav-title" id="month-nav-title"></div>
+          <button class="month-arrow" id="next-month">&#9654;</button>
+        </div>
+        <div class="mini-grid" id="mini-grid"></div>
+      </div>
+    </div>
+
+    <!-- Right: protein info -->
+    <div class="info-col">
+      <div class="protein-card">
+        <div class="card-header">
+          <span class="type-badge" id="protein-type">—</span>
+          <span class="pdb-badge" id="pdb-id">PDB: —</span>
+        </div>
+        <h2 class="protein-name" id="protein-name">—</h2>
+        <p class="protein-description" id="protein-description">—</p>
+
+        <div class="stats-container">
+          <div class="stat-row">
+            <span class="stat-label">Bio Relevance</span>
+            <div class="stat-bar-container">
+              <div id="bio-bar" class="stat-bar bio-bar" style="width:0%"></div>
+            </div>
+            <span class="stat-value" id="bio-value">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Notoriety</span>
+            <div class="stat-bar-container">
+              <div id="notoriety-bar" class="stat-bar notoriety-bar" style="width:0%"></div>
+            </div>
+            <span class="stat-value" id="notoriety-value">0</span>
+          </div>
+        </div>
+
+        <div class="discovery-section">
+          <span class="discovery-label">Discovered</span>
+          <span class="discovery-year" id="discovery-year">—</span>
+        </div>
+
+        <div class="fun-fact-section">
+          <div class="fun-fact-header">✦ Fun Fact ✦</div>
+          <p class="fun-fact-text" id="fun-fact">—</p>
+        </div>
+
+        <a class="pdb-link" id="pdb-link" href="#" target="_blank" rel="noopener">
+          View structure on RCSB PDB ↗
+        </a>
+      </div>
+
+      <div class="protein-nav">
+        <a href="#" id="nav-prev">← Previous</a>
+        <a href="#" id="nav-next">Next →</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="proteins.js"></script>
+  <script src="cache.js"></script>
+  <script>
+    const YEAR = 2026;
+    const MONTHS = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+    const DOW = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+    const TYPE_HEX = {
+      'enzyme':'#8B1A1A','structural':'#1a4a7a','signaling':'#1a6b3a',
+      'transport':'#7a4a1a','immune':'#2a6b6b','receptor':'#3a2a7a',
+      'motor':'#6a1a6a','storage':'#5a4a2a','nucleic-acid':'#2a4a7a',
+      'regulatory':'#5a2a5a','channel':'#1a5a6a','photosynthetic':'#2a5a1a',
+      'viral':'#7a1a1a','chaperone':'#4a1a6a','de-novo':'#b8860b',
+    };
+
+    function dayOfYear(y, m, d) {
+      return Math.floor((new Date(y, m, d) - new Date(y, 0, 0)) / 86400000);
+    }
+
+    function doyToDate(doy) {
+      const d = new Date(YEAR, 0, doy);
+      return { month: d.getMonth(), day: d.getDate() };
+    }
+
+    // Read ?day= from URL (1-indexed day of year)
+    const params = new URLSearchParams(location.search);
+    let currentDoy = parseInt(params.get('day')) || 1;
+    currentDoy = Math.max(1, Math.min(365, currentDoy));
+
+    const today = new Date();
+    const todayDOY = dayOfYear(today.getFullYear(), today.getMonth(), today.getDate());
+
+    // ── Viewer ──
+    let viewer = null;
+    const pdbCache = new PDBCache();
+
+    const viewerEl = document.getElementById('protein-viewer');
+    requestAnimationFrame(() => {
+      viewerEl.innerHTML = '';
+      viewer = $3Dmol.createViewer(viewerEl, {
+        backgroundColor: 'rgb(10,10,10)',
+        antialias: true
+      });
+      loadStructure(PROTEINS[currentDoy - 1].pdbId);
+    });
+
+    async function loadStructure(pdbId) {
+      if (!viewer) return;
+      try {
+        let data = await pdbCache.get(pdbId);
+        const fromCache = data !== null;
+        if (!fromCache) {
+          const r = await fetch(`https://files.rcsb.org/download/${pdbId}.pdb`);
+          if (!r.ok) throw new Error('Fetch failed');
+          data = await r.text();
+          pdbCache.set(pdbId, data);
+        }
+        const indicator = document.getElementById('cache-status');
+        const count = await pdbCache.count();
+        indicator.textContent = fromCache ? `⚡ Cached (${count}/365)` : `Loaded (${count}/365 cached)`;
+        indicator.className = 'cache-indicator ' + (fromCache ? 'cached' : 'live');
+
+        viewer.clear();
+        viewer.addModel(data, 'pdb');
+        viewer.setStyle({}, { cartoon: { color: 'spectrum', thickness: 0.4 } });
+        viewer.zoomTo();
+        viewer.render();
+        startRotation();
+      } catch(e) {
+        viewerEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;font-size:0.85rem;">Could not load structure — ${pdbId}</div>`;
+      }
+    }
+
+    function startRotation() {
+      let rotating = true, timeout;
+      const spin = () => { if (rotating && viewer) { viewer.rotate(0.3,'y'); viewer.render(); requestAnimationFrame(spin); } };
+      viewerEl.addEventListener('mousedown', () => { rotating = false; });
+      viewerEl.addEventListener('touchstart', () => { rotating = false; }, { passive: true });
+      viewerEl.addEventListener('mouseup', () => { clearTimeout(timeout); timeout = setTimeout(() => { rotating = true; spin(); }, 3000); });
+      viewerEl.addEventListener('touchend', () => { clearTimeout(timeout); timeout = setTimeout(() => { rotating = true; spin(); }, 3000); }, { passive: true });
+      spin();
+    }
+
+    // ── Render protein info ──
+    function animateNumber(el, end) {
+      const start = performance.now();
+      const update = (now) => {
+        const p = Math.min((now - start) / 800, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(end * ease);
+        if (p < 1) requestAnimationFrame(update);
+      };
+      requestAnimationFrame(update);
+    }
+
+    function renderProtein(doy) {
+      const protein = PROTEINS[doy - 1];
+      if (!protein) return;
+      const { month, day } = doyToDate(doy);
+      const dateStr = new Date(YEAR, month, day).toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+
+      document.title = `${protein.name} — Protein of the Day 2026`;
+      document.getElementById('date-strip').textContent = `Day ${doy} · ${dateStr}`;
+
+      const typeBadge = document.getElementById('protein-type');
+      typeBadge.textContent = protein.type.toUpperCase().replace('-', ' ');
+      typeBadge.className = `type-badge ${protein.type}`;
+
+      document.getElementById('pdb-id').textContent = `PDB: ${protein.pdbId}`;
+      document.getElementById('protein-name').textContent = protein.name;
+      document.getElementById('protein-description').textContent = protein.description;
+      document.getElementById('discovery-year').textContent = protein.discoveryYear;
+      document.getElementById('fun-fact').textContent = protein.funFact;
+      document.getElementById('pdb-link').href = `https://www.rcsb.org/structure/${protein.pdbId}`;
+
+      // Stat bars
+      const bioBar = document.getElementById('bio-bar');
+      const notBar = document.getElementById('notoriety-bar');
+      bioBar.style.width = '0%'; notBar.style.width = '0%';
+      setTimeout(() => {
+        bioBar.style.width = protein.bioRelevance + '%';
+        notBar.style.width = protein.notoriety + '%';
+        animateNumber(document.getElementById('bio-value'), protein.bioRelevance);
+        animateNumber(document.getElementById('notoriety-value'), protein.notoriety);
+      }, 100);
+
+      // Prev / Next
+      const prevEl = document.getElementById('nav-prev');
+      const nextEl = document.getElementById('nav-next');
+      if (doy > 1) {
+        prevEl.href = `protein.html?day=${doy - 1}`;
+        prevEl.classList.remove('hidden');
+      } else {
+        prevEl.classList.add('hidden');
+      }
+      if (doy < 365) {
+        nextEl.href = `protein.html?day=${doy + 1}`;
+        nextEl.classList.remove('hidden');
+      } else {
+        nextEl.classList.add('hidden');
+      }
+
+      // Mini calendar
+      renderMiniCalendar(month, doy);
+    }
+
+    // ── Mini calendar ──
+    let viewingMonth;
+
+    function renderMiniCalendar(month, activeDoy) {
+      viewingMonth = month;
+      document.getElementById('month-nav-title').textContent = MONTHS[month];
+      document.getElementById('prev-month').disabled = month === 0;
+      document.getElementById('next-month').disabled = month === 11;
+
+      const grid = document.getElementById('mini-grid');
+      grid.innerHTML = '';
+
+      DOW.forEach(d => {
+        const h = document.createElement('div');
+        h.className = 'mini-dow';
+        h.textContent = d;
+        grid.appendChild(h);
+      });
+
+      const firstDOW = new Date(YEAR, month, 1).getDay();
+      const daysInMonth = new Date(YEAR, month + 1, 0).getDate();
+
+      for (let e = 0; e < firstDOW; e++) {
+        const empty = document.createElement('div');
+        empty.className = 'mini-cell empty';
+        grid.appendChild(empty);
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const doy = dayOfYear(YEAR, month, d);
+        const protein = PROTEINS[doy - 1];
+        const cell = document.createElement('a');
+        cell.className = 'mini-cell';
+        cell.href = `protein.html?day=${doy}`;
+
+        const typeHex = protein ? (TYPE_HEX[protein.type] || '#888') : '#ccc';
+        cell.style.background = typeHex;
+
+        if (protein && protein.type === 'de-novo') cell.classList.add('de-novo');
+        if (doy < todayDOY) cell.classList.add('past');
+        if (doy === activeDoy) cell.classList.add('active');
+
+        const num = document.createElement('span');
+        num.className = 'mini-num';
+        num.textContent = d;
+        cell.appendChild(num);
+        grid.appendChild(cell);
+      }
+    }
+
+    document.getElementById('prev-month').addEventListener('click', () => {
+      if (viewingMonth > 0) renderMiniCalendar(viewingMonth - 1, currentDoy);
+    });
+    document.getElementById('next-month').addEventListener('click', () => {
+      if (viewingMonth < 11) renderMiniCalendar(viewingMonth + 1, currentDoy);
+    });
+
+    // ── Init ──
+    renderProtein(currentDoy);
+  </script>
+</body>
+</html>
