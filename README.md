@@ -2,6 +2,8 @@
 
 A daily protein structure viewer — one new protein every day of the year, rendered interactively in 3D. Built as a progressive web app with [Capacitor](https://capacitorjs.com/) for iOS/Android deployment.
 
+![2026 Calendar — all 365 proteins color-coded by type](assets/calendar-preview.png)
+
 ## Features
 
 - 365 curated proteins, one per day
