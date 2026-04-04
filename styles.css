@@ -106,51 +106,6 @@ body {
     justify-content: center;
 }
 
-.style-btn {
-    padding: 8px 18px;
-    min-height: 36px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--mid);
-    border-radius: 2px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-family: 'Source Sans 3', sans-serif;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    transition: all 0.2s ease;
-}
-
-.style-btn:hover {
-    border-color: var(--crimson);
-    color: var(--crimson);
-}
-
-.style-btn.active {
-    background: var(--crimson);
-    border-color: var(--crimson);
-    color: #fff;
-}
-
-.reset-btn {
-    padding: 8px 18px;
-    min-height: 36px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-    border-radius: 2px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-family: 'Source Sans 3', sans-serif;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    transition: all 0.2s ease;
-}
-
-.reset-btn:hover {
-    border-color: var(--dark);
-    color: var(--dark);
-}
 
 .viewer-hint {
     text-align: center;

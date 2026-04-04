@@ -4,8 +4,7 @@ class ProteinApp {
     constructor() {
         this.viewer = null;
         this.currentProteinIndex = this.getDayOfYear() - 1;
-        this.currentStyle = 'cartoon';
-        this.pdbCache = new PDBCache();
+this.pdbCache = new PDBCache();
         this.init();
     }
 
@@ -52,15 +51,6 @@ class ProteinApp {
         document.getElementById('prev-btn').addEventListener('click', () => this.navigate(-1));
         document.getElementById('next-btn').addEventListener('click', () => this.navigate(1));
         document.getElementById('today-btn').addEventListener('click', () => this.goToToday());
-
-        // Style buttons
-        document.getElementById('style-cartoon').addEventListener('click', () => this.setStyle('cartoon'));
-        document.getElementById('style-surface').addEventListener('click', () => this.setStyle('surface'));
-        document.getElementById('style-stick').addEventListener('click', () => this.setStyle('stick'));
-        document.getElementById('style-sphere').addEventListener('click', () => this.setStyle('sphere'));
-
-        // Reset view button
-        document.getElementById('reset-view').addEventListener('click', () => this.resetView());
 
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
@@ -235,8 +225,8 @@ class ProteinApp {
             this.viewer.clear();
             this.viewer.addModel(pdbData, 'pdb');
 
-            // Apply current style
-            this.applyStyle(this.currentStyle);
+            // Apply cartoon style
+            this.applyCartoon();
 
             // Center and zoom
             this.viewer.zoomTo();
@@ -313,74 +303,10 @@ class ProteinApp {
         rotate();
     }
 
-    setStyle(style) {
-        this.currentStyle = style;
-
-        // Update button states
-        document.querySelectorAll('.style-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        document.getElementById(`style-${style}`).classList.add('active');
-
-        // Apply style
-        this.applyStyle(style);
-    }
-
-    applyStyle(style) {
+    applyCartoon() {
         if (!this.viewer) return;
-
-        this.viewer.setStyle({}, {}); // Clear existing styles
-
-        switch (style) {
-            case 'cartoon':
-                this.viewer.setStyle({}, {
-                    cartoon: {
-                        color: 'spectrum',
-                        thickness: 0.4
-                    }
-                });
-                break;
-
-            case 'surface':
-                this.viewer.setStyle({}, {
-                    cartoon: {
-                        color: 'spectrum',
-                        opacity: 0.5
-                    }
-                });
-                this.viewer.addSurface($3Dmol.SurfaceType.VDW, {
-                    opacity: 0.85,
-                    color: 'spectrum'
-                });
-                break;
-
-            case 'stick':
-                this.viewer.setStyle({}, {
-                    stick: {
-                        colorscheme: 'Jmol',
-                        radius: 0.15
-                    }
-                });
-                break;
-
-            case 'sphere':
-                this.viewer.setStyle({}, {
-                    sphere: {
-                        colorscheme: 'Jmol',
-                        scale: 0.25
-                    }
-                });
-                break;
-        }
-
+        this.viewer.setStyle({}, { cartoon: { color: 'spectrum', thickness: 0.4 } });
         this.viewer.render();
-    }
-
-    resetView() {
-        if (this.viewer) {
-            this.viewer.zoomTo();
-            this.viewer.render();
-        }
     }
 
     // ---- Streak Tracker ----
