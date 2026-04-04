@@ -4,52 +4,74 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Protein of the Day — 2026 Calendar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --bg: #0c0c1e;
-      --surface: #1a1a2e;
-      --border: rgba(102,126,234,0.2);
-      --text: #e0e0ff;
-      --muted: #666;
-      --today-ring: #ffd700;
+      --crimson: #8B1A1A;
+      --dark: #1a1a1a;
+      --muted: #999;
+      --border: #ddd;
+      --bg: #fafafa;
+      --surface: #fff;
+      --today-ring: #8B1A1A;
     }
 
     body {
       background: var(--bg);
-      color: var(--text);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--dark);
+      font-family: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif;
       min-height: 100vh;
-      padding: 32px 20px 60px;
+      padding: 40px 20px 60px;
     }
 
     header {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 36px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
     }
-    header h1 { font-size: clamp(1.4rem, 4vw, 2.2rem); letter-spacing: 2px; }
-    header p  { color: var(--muted); margin-top: 6px; font-size: 0.85rem; letter-spacing: 1px; }
+    header h1 {
+      font-family: 'Libre Baskerville', Georgia, serif;
+      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      font-style: italic;
+      color: var(--crimson);
+      letter-spacing: 1px;
+    }
+    header p {
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 0.78rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 300;
+    }
 
     /* Legend */
     .legend {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 10px 18px;
-      margin-bottom: 36px;
+      gap: 5px 12px;
+      margin-bottom: 32px;
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 0.72rem;
-      letter-spacing: 0.5px;
+      gap: 5px;
+      font-size: 0.58rem;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      color: #aaa;
+      color: var(--muted);
+      font-weight: 600;
     }
     .legend-dot {
-      width: 10px; height: 10px;
+      width: 7px; height: 7px;
       border-radius: 50%;
       flex-shrink: 0;
     }
@@ -58,7 +80,7 @@
     .year-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 24px;
+      gap: 20px;
       max-width: 1300px;
       margin: 0 auto;
     }
@@ -67,15 +89,17 @@
     .month {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-top: 2px solid var(--crimson);
+      border-radius: 2px;
       padding: 14px;
     }
     .month-name {
-      font-size: 0.7rem;
+      font-family: 'Libre Baskerville', Georgia, serif;
+      font-size: 0.72rem;
       font-weight: 700;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: #8888cc;
+      color: var(--crimson);
       margin-bottom: 10px;
       text-align: center;
     }
@@ -85,17 +109,19 @@
       gap: 3px;
     }
     .dow-header {
-      font-size: 0.55rem;
+      font-size: 0.52rem;
       color: var(--muted);
       text-align: center;
       padding-bottom: 4px;
       letter-spacing: 0.5px;
+      font-weight: 600;
+      text-transform: uppercase;
     }
 
     /* Individual day cell */
     .day-cell {
       aspect-ratio: 1;
-      border-radius: 4px;
+      border-radius: 2px;
       cursor: pointer;
       position: relative;
       transition: transform 0.12s, box-shadow 0.12s;
@@ -104,28 +130,27 @@
     .day-cell:hover {
       transform: scale(1.35);
       z-index: 10;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     .day-cell.empty { background: transparent; cursor: default; }
-    .day-cell.past  { opacity: 0.4; }
+    .day-cell.past  { opacity: 0.35; }
     .day-cell.today {
       border: 2px solid var(--today-ring) !important;
-      box-shadow: 0 0 8px rgba(255,215,0,0.5);
+      box-shadow: 0 0 6px rgba(139,26,26,0.4);
       opacity: 1 !important;
     }
     .day-cell.de-novo {
-      box-shadow: 0 0 6px rgba(255,210,0,0.7);
       animation: pulse-gold 2.5s ease-in-out infinite alternate;
     }
     @keyframes pulse-gold {
-      from { box-shadow: 0 0 4px rgba(255,210,0,0.5); }
-      to   { box-shadow: 0 0 10px rgba(255,210,0,0.9); }
+      from { box-shadow: 0 0 3px rgba(184,134,11,0.5); }
+      to   { box-shadow: 0 0 8px rgba(184,134,11,0.9); }
     }
     .day-cell .day-num {
       position: absolute;
       top: 1px; left: 2px;
       font-size: 0.42rem;
-      color: rgba(255,255,255,0.55);
+      color: rgba(255,255,255,0.6);
       line-height: 1;
     }
 
@@ -133,53 +158,58 @@
     .tooltip {
       display: none;
       position: fixed;
-      background: #1a1a3e;
-      border: 1px solid rgba(102,126,234,0.5);
-      border-radius: 8px;
-      padding: 10px 14px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--crimson);
+      border-radius: 2px;
+      padding: 12px 16px;
       font-size: 0.78rem;
       pointer-events: none;
       z-index: 1000;
       max-width: 240px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     }
     .tooltip.visible { display: block; }
-    .tooltip-date   { font-size: 0.65rem; color: var(--muted); margin-bottom: 4px; }
-    .tooltip-name   { font-weight: 700; color: #fff; margin-bottom: 4px; }
-    .tooltip-type   { font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; }
-    .tooltip-fact   { font-size: 0.68rem; color: #aaa; margin-top: 6px; line-height: 1.4; border-top: 1px solid var(--border); padding-top: 6px; }
+    .tooltip-date   { font-size: 0.62rem; color: var(--muted); margin-bottom: 4px; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
+    .tooltip-name   { font-family: 'Libre Baskerville', Georgia, serif; font-weight: 700; font-style: italic; color: var(--dark); margin-bottom: 4px; font-size: 0.9rem; }
+    .tooltip-type   { font-size: 0.6rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; }
+    .tooltip-fact   { font-size: 0.68rem; color: #666; margin-top: 8px; line-height: 1.5; border-top: 1px solid var(--border); padding-top: 8px; font-style: italic; }
 
-    /* Type colors — matches app badge colors */
-    .t-enzyme        { background: #c0456a; }
-    .t-structural    { background: #1a7abf; }
-    .t-signaling     { background: #1aaa65; }
-    .t-transport     { background: #c07a1a; }
-    .t-immune        { background: #5a9fa0; }
-    .t-receptor      { background: #5a4aa0; }
-    .t-motor         { background: #a04580; }
-    .t-storage       { background: #8a7050; }
-    .t-nucleic-acid  { background: #4a7aaa; }
-    .t-regulatory    { background: #8a5a8a; }
-    .t-channel       { background: #2a8aaa; }
-    .t-photosynthetic{ background: #3a8a2a; }
-    .t-viral         { background: #aa3a2a; }
-    .t-chaperone     { background: #7a4aaa; }
-    .t-de-novo       { background: linear-gradient(135deg, #f7971e, #ffd200); }
+    /* Type colors — muted, professional palette */
+    .t-enzyme        { background: #8B1A1A; }
+    .t-structural    { background: #1a4a7a; }
+    .t-signaling     { background: #1a6b3a; }
+    .t-transport     { background: #7a4a1a; }
+    .t-immune        { background: #2a6b6b; }
+    .t-receptor      { background: #3a2a7a; }
+    .t-motor         { background: #6a1a6a; }
+    .t-storage       { background: #5a4a2a; }
+    .t-nucleic-acid  { background: #2a4a7a; }
+    .t-regulatory    { background: #5a2a5a; }
+    .t-channel       { background: #1a5a6a; }
+    .t-photosynthetic{ background: #2a5a1a; }
+    .t-viral         { background: #7a1a1a; }
+    .t-chaperone     { background: #4a1a6a; }
+    .t-de-novo       { background: #b8860b; }
 
     footer {
       text-align: center;
       margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
       font-size: 0.72rem;
       color: var(--muted);
       letter-spacing: 1px;
+      text-transform: uppercase;
     }
-    footer a { color: #667eea; text-decoration: none; }
+    footer a { color: var(--crimson); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <header>
-    <h1>PROTEIN OF THE DAY — 2026</h1>
-    <p>365 proteins · one per day · color coded by type · ✦ = de novo designed</p>
+    <h1>Protein of the Day — 2026</h1>
+    <p>365 proteins · one per day · colour coded by type · ✦ = de novo designed</p>
   </header>
 
   <div class="legend" id="legend"></div>
@@ -188,7 +218,7 @@
   <div class="tooltip" id="tooltip"></div>
 
   <footer>
-    <p><a href="index.html">← Back to Protein of the Day</a> &nbsp;·&nbsp; steamulater.com</p>
+    <p><a href="index.html">← Back to Protein of the Day</a> &nbsp;·&nbsp; <a href="https://www.steamulater.com">steamulater.com</a></p>
   </footer>
 
   <script src="proteins.js"></script>
@@ -217,11 +247,11 @@
     };
 
     const TYPE_HEX = {
-      'enzyme':'#c0456a','structural':'#1a7abf','signaling':'#1aaa65',
-      'transport':'#c07a1a','immune':'#5a9fa0','receptor':'#5a4aa0',
-      'motor':'#a04580','storage':'#8a7050','nucleic-acid':'#4a7aaa',
-      'regulatory':'#8a5a8a','channel':'#2a8aaa','photosynthetic':'#3a8a2a',
-      'viral':'#aa3a2a','chaperone':'#7a4aaa','de-novo':'#f7971e',
+      'enzyme':'#8B1A1A','structural':'#1a4a7a','signaling':'#1a6b3a',
+      'transport':'#7a4a1a','immune':'#2a6b6b','receptor':'#3a2a7a',
+      'motor':'#6a1a6a','storage':'#5a4a2a','nucleic-acid':'#2a4a7a',
+      'regulatory':'#5a2a5a','channel':'#1a5a6a','photosynthetic':'#2a5a1a',
+      'viral':'#7a1a1a','chaperone':'#4a1a6a','de-novo':'#b8860b',
     };
 
     // Build day-of-year → protein map
@@ -242,7 +272,7 @@
       const dot = document.createElement('div');
       dot.className = 'legend-dot';
       dot.style.background = TYPE_HEX[type] || '#888';
-      if (type === 'de-novo') dot.style.boxShadow = '0 0 6px rgba(255,210,0,0.8)';
+      if (type === 'de-novo') dot.style.boxShadow = '0 0 5px rgba(184,134,11,0.8)';
       item.appendChild(dot);
       item.appendChild(document.createTextNode(type === 'de-novo' ? '✦ de novo designed' : type));
       legendEl.appendChild(item);
