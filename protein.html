@@ -545,6 +545,7 @@
   </div>
 
   <script src="proteins.js"></script>
+  <script src="blurbs.js"></script>
   <script src="cache.js"></script>
   <script>
     const YEAR = 2026;
@@ -660,8 +661,9 @@
       // Blurb
       const blurbSection = document.getElementById('blurb-section');
       const blurbText = document.getElementById('blurb-text');
-      if (protein.blurb) {
-        blurbText.textContent = protein.blurb;
+      const blurb = (typeof BLURBS !== 'undefined' && BLURBS[protein.id]) || protein.blurb;
+      if (blurb) {
+        blurbText.textContent = blurb;
         blurbSection.style.display = 'block';
       } else {
         blurbSection.style.display = 'none';
