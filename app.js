@@ -305,7 +305,10 @@ this.pdbCache = new PDBCache();
 
     applyCartoon() {
         if (!this.viewer) return;
-        this.viewer.setStyle({}, { cartoon: { color: 'spectrum', thickness: 0.4 } });
+        const atoms = this.viewer.getModel().selectedAtoms({});
+        const chains = new Set(atoms.map(a => a.chain));
+        const colorscheme = chains.size > 1 ? 'chain' : 'ssPyMol';
+        this.viewer.setStyle({}, { cartoon: { colorscheme, thickness: 0.4 } });
         this.viewer.render();
     }
 

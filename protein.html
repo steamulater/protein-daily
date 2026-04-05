@@ -610,7 +610,10 @@
 
         viewer.clear();
         viewer.addModel(data, 'pdb');
-        viewer.setStyle({}, { cartoon: { color: 'spectrum', thickness: 0.4 } });
+        const atoms = viewer.getModel().selectedAtoms({});
+        const chains = new Set(atoms.map(a => a.chain));
+        const colorscheme = chains.size > 1 ? 'chain' : 'ssPyMol';
+        viewer.setStyle({}, { cartoon: { colorscheme, thickness: 0.4 } });
         viewer.zoomTo();
         viewer.render();
         startRotation();
