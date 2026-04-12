@@ -25,6 +25,7 @@ this.pdbCache = new PDBCache();
         const streakData = this.loadStreak();
         this.updateStreakUI(streakData);
         this.loadProtein(this.currentProteinIndex);
+        ProteinNotifications.init(PROTEINS);
     }
 
     setupViewer() {
