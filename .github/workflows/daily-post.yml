@@ -1,0 +1,29 @@
+name: Post Protein of the Day
+
+on:
+  schedule:
+    - cron: '0 13 * * *'   # 9am ET (UTC-4 summer) — adjust for your timezone
+  workflow_dispatch:         # allows manual trigger from GitHub Actions tab
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run post script
+        env:
+          CANVA_API_TOKEN:   ${{ secrets.CANVA_API_TOKEN }}
+          CANVA_TEMPLATE_ID: ${{ secrets.CANVA_TEMPLATE_ID }}
+          X_API_KEY:         ${{ secrets.X_API_KEY }}
+          X_API_SECRET:      ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN:    ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET:   ${{ secrets.X_ACCESS_SECRET }}
+        run: node --experimental-vm-modules scripts/post-daily.js
