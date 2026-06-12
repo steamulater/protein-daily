@@ -5,22 +5,14 @@
 
 import { createHmac } from 'crypto';
 import { readFileSync } from 'fs';
-import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(__dirname, '..');
 
 // ─── Load proteins ────────────────────────────────────────────────────────────
-
-const proteinsPath = join(__dirname, '..', 'proteins.js');
-const raw = readFileSync(proteinsPath, 'utf8');
-// Strip the `const PROTEINS =` wrapper so we can JSON-parse the array
-const jsonStr = raw.replace(/^const PROTEINS\s*=\s*/, '').replace(/;\s*$/, '');
-const PROTEINS = JSON.parse(
-    jsonStr.replace(/undefined/g, 'null')
-           .replace(/,\s*([\]\}])/g, '$1') // trailing commas
-);
+const PROTEINS = JSON.parse(readFileSync(join(ROOT, 'proteins.json'), 'utf8'));
 
 // ─── Today's protein ─────────────────────────────────────────────────────────
 
@@ -40,10 +32,9 @@ if (!protein) {
 
 console.log(`Day ${dayIndex + 1}: ${protein.name} (${protein.pdbId})`);
 
-// ─── RCSB image URL ──────────────────────────────────────────────────────────
-
-const pdbLower = protein.pdbId.toLowerCase();
-const imageUrl = `https://cdn.rcsb.org/images/structures/${pdbLower}/${pdbLower}-assembly-1.jpeg`;
+// ─── Load image from disk (no network call) ───────────────────────────────────
+const imageBuffer = readFileSync(join(ROOT, 'images', `${protein.pdbId}.jpeg`));
+console.log(`Loaded image from disk: ${imageBuffer.length} bytes`);
 
 // ─── Canva helpers ───────────────────────────────────────────────────────────
 
@@ -77,20 +68,16 @@ async function poll(fn, label, intervalMs = 2000, maxAttempts = 30) {
     throw new Error(`Timed out waiting for ${label}`);
 }
 
-// Upload the RCSB image as a Canva asset
-async function uploadImageToCanva(url) {
-    console.log('Fetching RCSB image…');
-    const imgRes = await fetch(url);
-    if (!imgRes.ok) throw new Error(`RCSB image fetch failed: ${imgRes.status}`);
-    const buffer = await imgRes.arrayBuffer();
-    const bytes = Buffer.from(buffer);
+// Upload the local image buffer as a Canva asset
+async function uploadImageToCanva(buffer) {
+    console.log('Uploading image to Canva…');
 
     // Canva asset upload — multipart
     const boundary = '----CanvaBoundary';
     const body = Buffer.concat([
         Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="name"\r\n\r\n${protein.name}.jpg\r\n`),
         Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="asset"; filename="${protein.pdbId}.jpg"\r\nContent-Type: image/jpeg\r\n\r\n`),
-        bytes,
+        buffer,
         Buffer.from(`\r\n--${boundary}--\r\n`)
     ]);
 
@@ -244,8 +231,8 @@ async function postTweet(text, mediaId) {
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 async function main() {
-    // 1. Upload RCSB image to Canva
-    const assetId = await uploadImageToCanva(imageUrl);
+    // 1. Upload local image to Canva
+    const assetId = await uploadImageToCanva(imageBuffer);
     console.log(`  Asset ID: ${assetId}`);
 
     // 2. Fill template
@@ -253,19 +240,17 @@ async function main() {
     console.log(`  Design ID: ${designId}`);
 
     // 3. Export as PNG
-    const imageBuffer = await exportDesign(designId);
-    console.log(`  Exported ${imageBuffer.length} bytes`);
+    const pngBuffer = await exportDesign(designId);
+    console.log(`  Exported ${pngBuffer.length} bytes`);
 
     // 4. Upload to X and post
-    const mediaId = await uploadMediaToX(imageBuffer);
+    const mediaId = await uploadMediaToX(pngBuffer);
     const caption = [
         `Day ${dayIndex + 1} of 365 — ${protein.name}`,
         '',
-        protein.description,
+        protein.dailyBlurb,
         '',
-        `✨ ${protein.funFact}`,
-        '',
-        `#ProteinOfTheDay #Biochemistry #Science #PDB${protein.pdbId}`
+        `PDB: ${protein.pdbId}  |  #ProteinOfTheDay #Biochemistry #Science`
     ].join('\n');
 
     const tweet = await postTweet(caption, mediaId);
